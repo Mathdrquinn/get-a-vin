@@ -1,31 +1,46 @@
-import axios from 'axios';
-import copy from 'copy-to-clipboard';
+import React from 'react';
+import copyToClipboard from 'copy-to-clipboard';
+import { getRandomVin } from '../data/vins.js';
 
-const vin = '123ewjnkfm1e3rf';
+class Index extends React.Component {
+    state = {
+        vin: "1J4PP2GK1AW132691",
+    };
 
-const copyToClipboard = () => copy(vin);
-const getVin = () => axios.get('http://www.randomvin.com/getvin.php?type=real')
-.then((vin) => {
-    console.log(vin);
-    debugger;
-});
+    constructor(props) {
+        super(props);
+        this.onSubmit = this.onSubmit.bind(this);
+        this.copyVin = this.copyVin.bind(this);
+    }
 
-const Index = () => (
-    <main>
-        <h1>Generate a <abbr title="Vehicle Identification Number">VIN</abbr></h1>
-        <p>A dynamic flexible form for accessibly generating <abbr title="Vehicle Identification Numbers">VINs</abbr></p>
+    onSubmit(e) {
+        e.preventDefault();
+        const vin = getRandomVin();
+        this.setState({ vin });
+        copyToClipboard(vin);
+    }
 
-        <form onSubmit="">
-            <button type="submit">Get VIN</button>
-        </form>
+    copyVin() {
+        copyToClipboard(this.state.vin);
+    }
 
-        <section>
-            <h2>Result: <em>{vin}</em></h2>
-            <button type="button" onClick={copyToClipboard}>Copy to Clipboard</button>
-        </section>
+    render() {
+        return (
+            <main id="main">
+                <h1>Generate a <abbr title="Vehicle Identification Number">VIN</abbr></h1>
+                <p>A dynamic flexible form for accessibly generating <abbr title="Vehicle Identification Numbers">VINs</abbr></p>
 
-        <button onClick={getVin}>get vin</button>
-    </main>
-  )
-  
-  export default Index;
+                <form onSubmit={this.onSubmit}>
+                    <button type="submit">Get and Copy new VIN</button>
+                </form>
+
+                <section aria-live="polite">
+                    <h2>Result: <em>{this.state.vin}</em></h2>
+                    <button type="button" onClick={this.copyVin}>Copy to Clipboard</button>
+                </section>
+            </main>
+        );
+    }
+}
+
+export default Index;
