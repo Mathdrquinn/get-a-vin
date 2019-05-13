@@ -1,6 +1,7 @@
 import React from 'react';
 import copyToClipboard from 'copy-to-clipboard';
 import { getRandomVin } from '../data/vins.js';
+import { NotificationBar } from '../components/NotificationBar.jsx';
 
 class Index extends React.Component {
     state = {
@@ -38,6 +39,8 @@ class Index extends React.Component {
                     <h2>Result: <em>{this.state.vin}</em></h2>
                     <button type="button" onClick={this.copyVin}>Copy to Clipboard</button>
                 </section>
+
+                <NotificationBar />
             </main>
         );
     }
