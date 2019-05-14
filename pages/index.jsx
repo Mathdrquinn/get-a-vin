@@ -5,7 +5,7 @@ import { NotificationBar } from '../components/NotificationBar.jsx';
 
 class Index extends React.Component {
     state = {
-        vin: "1J4PP2GK1AW132691",
+        vins: [getRandomVin()],
     };
 
     constructor(props) {
@@ -17,12 +17,12 @@ class Index extends React.Component {
     onSubmit(e) {
         e.preventDefault();
         const vin = getRandomVin();
-        this.setState({ vin });
+        this.setState({ vins: [vin, ...this.state.vins] });
         copyToClipboard(vin);
     }
 
     copyVin() {
-        copyToClipboard(this.state.vin);
+        copyToClipboard(this.state.vins[0]);
     }
 
     render() {
@@ -36,11 +36,24 @@ class Index extends React.Component {
                 </form>
 
                 <section aria-live="polite">
-                    <h2>Result: <em>{this.state.vin}</em></h2>
+                    <h2>Result: <em>{this.state.vins[0]}</em></h2>
                     <button type="button" onClick={this.copyVin}>Copy to Clipboard</button>
                 </section>
 
-                <NotificationBar />
+                {
+                    this.state.vins.length > 1
+                    ? (
+                        <section>
+                            <h2>History</h2>
+                            <ul>
+                                {this.state.vins.slice(1).map((v) => (
+                                    <li>{v}</li>
+                                ))}
+                            </ul>
+                        </section>
+                    )
+                    : null
+                }
             </main>
         );
     }
