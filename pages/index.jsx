@@ -1,9 +1,8 @@
 import React from 'react';
 import copyToClipboard from 'copy-to-clipboard';
-import { getRandomVin } from '../data/vins.js';
-import { NotificationBar } from '../components/NotificationBar.jsx';
 import axios from 'axios';
 
+const GET_VIN_URL = process.env.GET_VIN_URL;
 const VIN_DETAILS_DOMAIN = process.env.VIN_DETAILS_DOMAIN;
 
 const getVehicleByVin = (vin) => {
@@ -16,9 +15,15 @@ const getVehicleByVin = (vin) => {
     .then(results => results.reduce((sum, r) => ({ ...sum, [r.Variable]: r.Value }), {}))
 }
 
+const getRandomVin = () => {
+    console.log(`Fetching random VIN from: ${GET_VIN_URL}`)
+    return axios.get(GET_VIN_URL)
+    .then(resp => resp.data)
+}
+
 class Index extends React.Component {
     state = {
-        vins: { [getRandomVin()]: null },
+        vins: {},
         errorMessage: null
     };
 
@@ -30,10 +35,13 @@ class Index extends React.Component {
     }
 
     componentDidMount() {
-        const vin = this.getVins()[0];
-        getVehicleByVin(vin)
-            .then(vehicleInfo => {
-                this.setState({ vins: { [vin]: vehicleInfo }, errorMessage: null });
+        getRandomVin()
+            .then(data => data.vin)
+            .then(vin => {
+                return getVehicleByVin(vin)
+                        .then(vehicleInfo => {
+                            this.setState({ vins: { [vin]: vehicleInfo }, errorMessage: null });
+                        })
             })
             .catch(e => {
                 console.error(e)
@@ -43,12 +51,15 @@ class Index extends React.Component {
 
     onSubmit(e) {
         e.preventDefault();
-        const vin = getRandomVin();
-        getVehicleByVin(vin)
-            .then(vehicleInfo => {
-                this.setState({ vins: { [vin]: vehicleInfo, ...this.state.vins }, errorMessage: null });
+        getRandomVin()
+            .then(data => data.vin)
+            .then(vin => {
+                return getVehicleByVin(vin)
+                    .then(vehicleInfo => {
+                        this.setState({ vins: { [vin]: vehicleInfo, ...this.state.vins }, errorMessage: null });
+                    })
+                    .then(() => copyToClipboard(vin))
             })
-            .then(() => copyToClipboard(vin))
             .catch(e => {
                 console.error(e)
                 this.setState({ errorMessage: e.message })
