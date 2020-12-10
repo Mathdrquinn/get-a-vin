@@ -4,15 +4,22 @@ import { getRandomVin } from '../data/vins.js';
 import { NotificationBar } from '../components/NotificationBar.jsx';
 import axios from 'axios';
 
-const getVehicleByVin = (vin) => axios.get(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinExtended/${vin}?format=json`)
+const VIN_DETAILS_DOMAIN = process.env.VIN_DETAILS_DOMAIN;
+
+const getVehicleByVin = (vin) => {
+    const url = `${VIN_DETAILS_DOMAIN}/api/vehicles/DecodeVinExtended/${vin}?format=json`
+    console.log(`Fetching VIN info from: ${url}`)
+    return axios.get(url)
     .then(resp => resp.data.Results
         .filter(r => r.Variable)
         .filter(r => r.Value))
     .then(results => results.reduce((sum, r) => ({ ...sum, [r.Variable]: r.Value }), {}))
+}
 
 class Index extends React.Component {
     state = {
         vins: { [getRandomVin()]: null },
+        errorMessage: null
     };
 
     constructor(props) {
@@ -26,7 +33,11 @@ class Index extends React.Component {
         const vin = this.getVins()[0];
         getVehicleByVin(vin)
             .then(vehicleInfo => {
-                this.setState({ vins: { [vin]: vehicleInfo } });
+                this.setState({ vins: { [vin]: vehicleInfo }, errorMessage: null });
+            })
+            .catch(e => {
+                console.error(e)
+                this.setState({ errorMessage: e.message })
             })
     }
 
@@ -35,9 +46,13 @@ class Index extends React.Component {
         const vin = getRandomVin();
         getVehicleByVin(vin)
             .then(vehicleInfo => {
-                this.setState({ vins: { [vin]: vehicleInfo, ...this.state.vins } });
+                this.setState({ vins: { [vin]: vehicleInfo, ...this.state.vins }, errorMessage: null });
             })
-            .then(() => copyToClipboard(vin));
+            .then(() => copyToClipboard(vin))
+            .catch(e => {
+                console.error(e)
+                this.setState({ errorMessage: e.message })
+            });
     }
 
     copyVin() {
@@ -58,18 +73,26 @@ class Index extends React.Component {
                     <h2 aria-live="polite">Result: <em>{this.getVins()[0]}</em></h2>
                     <button type="button" onClick={this.copyVin}>Copy to Clipboard</button>
                     <button type="submit">Get and Copy new VIN</button>
-                    <h3>Vehicle Info</h3>
-                    <pre><code>
                     {
-                        ((vehicleInfo) => {
-                            return vehicleInfo
-                                ? (
-                                    JSON.stringify(vehicleInfo, null, 4)
-                                )
-                                : 'Loading...'
-                        })(this.state.vins[this.getVins()[0]])
+                        this.state.errorMessage
+                            ? (<><h4>Error:</h4><p>{this.state.errorMessage}</p></>)
+                            : (
+                                <>
+                                    <h3>Vehicle Info</h3>
+                                    <pre><code>
+                                        {
+                                            ((vehicleInfo) => {
+                                                return vehicleInfo
+                                                    ? (
+                                                        JSON.stringify(vehicleInfo, null, 4)
+                                                    )
+                                                    : 'Loading...'
+                                            })(this.state.vins[this.getVins()[0]])
+                                        }
+                                    </code></pre>
+                                </>
+                            )
                     }
-                    </code></pre>
                 </form>
 
                 {
