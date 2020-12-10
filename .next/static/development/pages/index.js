@@ -2266,8 +2266,8 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 
 
-var GET_VIN_URL = "http://localhost:3001/api/random-vin";
-var VIN_DETAILS_DOMAIN = "https://vpic.nhtsa.dot.gov";
+var GET_VIN_URL = undefined;
+var VIN_DETAILS_DOMAIN = undefined;
 
 var getVehicleByVin = function getVehicleByVin(vin) {
   var url = "".concat(VIN_DETAILS_DOMAIN, "/api/vehicles/DecodeVinExtended/").concat(vin, "?format=json");

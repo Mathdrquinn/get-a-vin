@@ -120,8 +120,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
-const GET_VIN_URL = "http://localhost:3001/api/random-vin";
-const VIN_DETAILS_DOMAIN = "https://vpic.nhtsa.dot.gov";
+const GET_VIN_URL = undefined;
+const VIN_DETAILS_DOMAIN = undefined;
 
 const getVehicleByVin = vin => {
   const url = `${VIN_DETAILS_DOMAIN}/api/vehicles/DecodeVinExtended/${vin}?format=json`;
